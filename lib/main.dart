@@ -5,6 +5,7 @@ import 'package:image_flutter/pages/home.dart';
 void main() {
   runApp(MaterialApp(
     title: "Image Flutter",
+    theme: ThemeData(primarySwatch: Colors.green),
     initialRoute: '/',
     routes: {
       '/': (context) => Home(),
