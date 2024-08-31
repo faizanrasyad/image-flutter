@@ -14,12 +14,15 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text(
           'Upload Image Flutter',
-          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
+          style: TextStyle(
+              fontWeight: FontWeight.w500, fontSize: 18, color: Colors.white),
         ),
         backgroundColor: Colors.green,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, '/add');
+        },
         child: Image.asset(
           'assets/note_stack_add.png',
           width: 40,
