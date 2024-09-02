@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_flutter/networking/client/dio.dart';
 import 'package:image_flutter/networking/models/movies_model.dart';
+import 'package:image_flutter/pages/movie_detail.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -47,7 +48,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Upload Image Flutter',
+          'Movies',
           style: TextStyle(
               fontWeight: FontWeight.w500, fontSize: 18, color: Colors.white),
         ),
@@ -87,7 +88,13 @@ class _HomeState extends State<Home> {
                         itemCount: movies!.length,
                         itemBuilder: ((context, index) {
                           return InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          MovieDetail(movie: movies[index])));
+                            },
                             child: Container(
                               margin: EdgeInsets.symmetric(vertical: 16),
                               child: Row(
