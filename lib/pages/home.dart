@@ -18,8 +18,8 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    super.initState();
     getMovies();
+    super.initState();
   }
 
   Future<void> getMovies() async {

@@ -5,7 +5,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:image_flutter/networking/client/dio.dart';
+import 'package:image_flutter/pages/home.dart';
 import 'package:image_flutter/res/warna.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -26,22 +28,44 @@ class _AddMoviesState extends State<AddMovies> {
 
   File? image;
   String? imageUrl;
+  var maxFileSizeInBytes = 2 * 1048576;
 
-  Future pickImage() async {
+  Future pickImage(BuildContext context) async {
     try {
-      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image == null) return;
+      final image = await ImagePicker()
+          .pickImage(source: ImageSource.gallery, imageQuality: 50);
+      context.loaderOverlay.show();
+      if (image == null) {
+        context.loaderOverlay.hide();
+        return;
+      }
 
       print("Image Bytes ${image.readAsBytes()}");
       print("Image Path: ${image.path}");
 
-      final imageTemp = File(image.path);
+      var imageAsBytes = await image.readAsBytes();
+      var fileSize = imageAsBytes.length;
+      var imageTemp;
+      File compressedFile =
+          await FlutterNativeImage.compressImage(image.path, quality: 50);
+      imageTemp = compressedFile;
 
-      print("Image Temp: $imageTemp");
-
+      if (image.path.endsWith("png") ||
+          image.path.endsWith("jpeg") ||
+          image.path.endsWith("jpg")) {
+        if (fileSize >= maxFileSizeInBytes) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("File is too big")));
+          return;
+        } else {}
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("File extension is not allowed")));
+      }
       setState(() {
         this.image = imageTemp;
       });
+      context.loaderOverlay.hide();
     } on PlatformException catch (e) {
       print("Failed to pick image: $e");
     }
@@ -183,7 +207,7 @@ class _AddMoviesState extends State<AddMovies> {
                                     const EdgeInsets.only(top: 8, bottom: 16),
                                 child: InkWell(
                                     onTap: () {
-                                      pickImage();
+                                      pickImage(context);
                                     },
                                     child: image == null
                                         ? Container(
