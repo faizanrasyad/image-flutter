@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_flutter/pages/add_movies.dart';
 import 'package:image_flutter/pages/home.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(GlobalLoaderOverlay(
+      child: MaterialApp(
     title: "Image Flutter",
     theme: ThemeData(primarySwatch: Colors.green),
     initialRoute: '/',
@@ -12,5 +14,5 @@ void main() {
       '/add': (context) => AddMovies(),
     },
     debugShowCheckedModeBanner: false,
-  ));
+  )));
 }

@@ -78,7 +78,7 @@ class _AddMoviesState extends State<AddMovies> {
       final resp = await DioClient()
           .postMovie(nameController.text, productionController.text, imageUrl!);
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Add Data Success')));
+          .showSnackBar(SnackBar(content: Text('Add Movie Success')));
       Navigator.pop(context);
     }
   }
@@ -141,7 +141,7 @@ class _AddMoviesState extends State<AddMovies> {
                                     )),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "Judul can't be empty";
+                                    return "Movie name can't be empty";
                                   }
                                   return null;
                                 },
@@ -167,7 +167,7 @@ class _AddMoviesState extends State<AddMovies> {
                                     )),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "Judul can't be empty";
+                                    return "Production house can't be empty";
                                   }
                                   return null;
                                 },
@@ -272,7 +272,14 @@ class _AddMoviesState extends State<AddMovies> {
                               child: Center(
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    postMovie(context);
+                                    if (image != null) {
+                                      postMovie(context);
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  ("Movie Poster can't be empty"))));
+                                    }
                                   },
                                   child: Row(
                                       mainAxisAlignment:
