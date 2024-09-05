@@ -22,6 +22,7 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
+  // Dio GET Method
   Future<void> getMovies() async {
     Dio dio = await DioClient().getClient();
 

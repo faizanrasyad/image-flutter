@@ -6,19 +6,24 @@ import 'package:image_flutter/networking/models/movies_model.dart';
 import 'package:path/path.dart';
 
 class DioClient {
+  // Declare the baseUrl (API Url)
   final baseUrl = "http://10.132.75.76/imageflutter/api";
 
+  // Setup your Dio Settings
   Future<Dio> getClient() async {
     Dio dio = new Dio();
 
+    // Headers
     Map<String, String> headers = <String, String>{
       'Accept': 'application/json',
     };
-
     dio.options.headers = headers;
+
+    // Timeout
     dio.options.connectTimeout = const Duration(seconds: 10);
     dio.options.receiveTimeout = const Duration(seconds: 10);
 
+    // Interceptors (Logging for easier maintenance)
     dio.interceptors.add(LogInterceptor(
         request: true,
         requestBody: true,
@@ -29,6 +34,7 @@ class DioClient {
     return dio;
   }
 
+  // Dio POST Method
   Future<void> postMovie(String name, String prod, String image) async {
     try {
       Dio dio = await DioClient().getClient();
