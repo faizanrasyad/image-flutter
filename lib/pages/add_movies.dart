@@ -35,17 +35,28 @@ class _AddMoviesState extends State<AddMovies> {
       final image = await ImagePicker()
           .pickImage(source: ImageSource.gallery, imageQuality: 50);
       context.loaderOverlay.show();
+
+      var imageAsBytes = await image!.readAsBytes();
+      var fileSize = imageAsBytes.length;
+      var imageTemp;
+
+      // Null Checking
       if (image == null) {
         context.loaderOverlay.hide();
         return;
       }
 
+      // File Size Checking (Must be less than 2 MB [Mega Bytes] )
+      if (fileSize >= maxFileSizeInBytes) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("File is too big")));
+        context.loaderOverlay.hide();
+        return;
+      } else {}
+
       print("Image Bytes ${image.readAsBytes()}");
       print("Image Path: ${image.path}");
 
-      var imageAsBytes = await image.readAsBytes();
-      var fileSize = imageAsBytes.length;
-      var imageTemp;
       File compressedFile =
           await FlutterNativeImage.compressImage(image.path, quality: 50);
       imageTemp = compressedFile;
@@ -53,11 +64,6 @@ class _AddMoviesState extends State<AddMovies> {
       if (image.path.endsWith("png") ||
           image.path.endsWith("jpeg") ||
           image.path.endsWith("jpg")) {
-        if (fileSize >= maxFileSizeInBytes) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("File is too big")));
-          return;
-        } else {}
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("File extension is not allowed")));
