@@ -16,6 +16,7 @@ dependencies:
   loader_overlay: ^4.0.1
   path: ^1.9.0
   path_provider: ^2.1.4
+  process_run: ^1.0.1
 
 dev_dependencies:
   flutter_test:

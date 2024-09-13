@@ -7,7 +7,7 @@ import 'package:path/path.dart';
 
 class DioClient {
   // Declare the baseUrl (API Url)
-  final baseUrl = "http://10.132.75.76/imageflutter/api";
+  final baseUrl = "http://192.168.1.29/imageflutter/api";
 
   // Setup your Dio Settings
   Future<Dio> getClient() async {

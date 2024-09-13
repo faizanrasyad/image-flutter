@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:path/path.dart';
+import 'package:process_run/process_run.dart'; // Import process_run
 
 class AddMovies extends StatefulWidget {
   const AddMovies({super.key});
@@ -26,51 +27,122 @@ class _AddMoviesState extends State<AddMovies> {
   TextEditingController productionController = new TextEditingController();
   final formKey = GlobalKey<FormState>();
 
-  File? image;
+  XFile? image;
   String? imageUrl;
-  var maxFileSizeInBytes = 2 * 1048576;
 
-  Future pickImage(BuildContext context) async {
+  Future<bool> checkSuspiciousFile(
+      XFile pickedImage, BuildContext context) async {
+    var imageAsBytes = await pickedImage.readAsBytes();
+    // Convert all bytes into one single hex string
+    String hexString = imageAsBytes.map((byte) {
+      return byte.toRadixString(16).padLeft(2, '0');
+    }).join();
+
+    // List of suspicious text
+    List<String> suspiciousCommands = [
+      '414c544552', // ALTER
+      '616c746572', // alter
+      '65786563', // exec
+      '45584543', // EXEC
+      '65786563757465', // execute
+      '45584543555445', // EXECUTE
+      '64726f70', // drop
+      '44524f50', // DROP
+      '73656c656374', // select
+      '53454c454354', // SELECT
+      '68746d6c', // html
+      '48544d4c', // HTML
+      '637265617465', // create
+      '435245415445' // CREATE
+    ];
+
+    for (String command in suspiciousCommands) {
+      if (hexString.contains(command)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("File is Suspicious!")),
+        );
+        context.loaderOverlay.hide();
+        return false;
+      }
+    }
+
+    print("Hex Values Length: ${hexString.length ~/ 2}");
+    print("Image Path: ${pickedImage.path}");
+    return true;
+  }
+
+  Future<bool> validateImage(BuildContext context) async {
     try {
-      final image = await ImagePicker()
-          .pickImage(source: ImageSource.gallery, imageQuality: 50);
+      var pickedImage =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
       context.loaderOverlay.show();
 
-      var imageAsBytes = await image!.readAsBytes();
-      var fileSize = imageAsBytes.length;
-      var imageTemp;
+      var imageFile = File(pickedImage!.path);
+      int fileSize = await imageFile.length();
+      int maxFileSizeInBytes = 5 * 1024 * 1024;
 
       // Null Checking
-      if (image == null) {
+      if (pickedImage == null) {
         context.loaderOverlay.hide();
-        return;
+        return false;
       }
 
-      // File Size Checking (Must be less than 2 MB [Mega Bytes] )
+      // File Size Checking (Must be less than 5 MB [Mega Bytes] )
       if (fileSize >= maxFileSizeInBytes) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("File is too big")));
-        context.loaderOverlay.hide();
-        return;
-      } else {}
-
-      print("Image Bytes ${image.readAsBytes()}");
-      print("Image Path: ${image.path}");
-
-      File compressedFile =
-          await FlutterNativeImage.compressImage(image.path, quality: 50);
-      imageTemp = compressedFile;
-
-      if (image.path.endsWith("png") ||
-          image.path.endsWith("jpeg") ||
-          image.path.endsWith("jpg")) {
-      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("File extension is not allowed")));
+            SnackBar(content: Text("File size is more than 5MB")));
+        context.loaderOverlay.hide();
+        return false;
       }
+
+      // Suspicious File Checking
+      var result = await checkSuspiciousFile(pickedImage, context);
+      if (result == false) {
+        context.loaderOverlay.hide();
+        return false;
+      }
+
       setState(() {
-        this.image = imageTemp;
+        image = pickedImage;
       });
+      context.loaderOverlay.hide();
+      return true;
+    } on PlatformException catch (e) {
+      print("Failed to pick image: $e");
+      return false;
+    }
+  }
+
+  bool gambar = true;
+  Future pickImage(BuildContext context) async {
+    try {
+      var result = await validateImage(context);
+      print("Berjalan!!");
+      context.loaderOverlay.show();
+      print("Result = $result");
+
+      var imageAsBytes = await image!.readAsBytes();
+      XFile imageTemp;
+
+      print("Bool Gambar: $gambar");
+
+      if (result == true) {
+        File compressedFile =
+            await FlutterNativeImage.compressImage(image!.path, quality: 50);
+        imageTemp = XFile(compressedFile.path);
+
+        if (image!.path.endsWith("png") ||
+            image!.path.endsWith("jpeg") ||
+            image!.path.endsWith("jpg")) {
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("File extension is not allowed")));
+          return false;
+        }
+        setState(() {
+          image = imageTemp;
+        });
+      }
       context.loaderOverlay.hide();
     } on PlatformException catch (e) {
       print("Failed to pick image: $e");
@@ -290,7 +362,7 @@ class _AddMoviesState extends State<AddMovies> {
                                           ))),
                             Container(
                               child: image != null
-                                  ? Image.file(image!)
+                                  ? Center(child: Image.file(File(image!.path)))
                                   : const Center(),
                             ),
                             SizedBox(

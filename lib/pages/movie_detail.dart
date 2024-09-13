@@ -47,7 +47,7 @@ class _MovieDetailState extends State<MovieDetail> {
                       child: ClipRRect(
                         child: Image.network(
                           movie.image,
-                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.width,
                         ),
                       ),
                     ),
